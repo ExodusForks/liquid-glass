@@ -9,6 +9,7 @@
   "exports": {
     ".": {
       "types": "./lib/typescript/src/index.d.ts",
+      "react-native": "./lib/commonjs/index.js",
       "import": "./lib/module/index.js",
       "require": "./lib/commonjs/index.js"
     },
