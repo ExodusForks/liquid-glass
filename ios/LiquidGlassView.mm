@@ -1,5 +1,6 @@
 #import "LiquidGlassView.h"
 #import <React/RCTConvert.h>
+#import <React/UIView+React.h>
 
 #ifdef RCT_NEW_ARCH_ENABLED
 #import <react/renderer/components/RNLiquidGlassViewSpec/ComponentDescriptors.h>
@@ -63,12 +64,22 @@ typedef NS_ENUM(NSInteger, EXGlassEffectStyle) {
 
 - (void)insertReactSubview:(UIView *)subview atIndex:(NSInteger)atIndex
 {
-    [effectView.contentView insertSubview:subview atIndex:atIndex];
+    // Keep React's reactSubviews bookkeeping intact; attaching happens in didUpdateReactSubviews.
+    // Bypassing super leaves reactSubviews empty, which crashes reanimated's swizzled
+    // _manageChildren (nil entry in removedViewsWithIndices) when a child is removed.
+    [super insertReactSubview:subview atIndex:atIndex];
 }
 
 - (void)removeReactSubview:(UIView *)subview
 {
-    [subview removeFromSuperview];
+    [super removeReactSubview:subview];
+}
+
+- (void)didUpdateReactSubviews
+{
+    for (UIView *subview in self.reactSubviews) {
+        [effectView.contentView addSubview:subview];
+    }
 }
 
 #ifdef RCT_NEW_ARCH_ENABLED
